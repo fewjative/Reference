@@ -1,0 +1,10 @@
+{
+    entry = {
+	bundle = ReferenceSettings;
+	cell = PSLinkCell;
+	detail = ReferenceListController;
+	icon = ReferenceSettings.png;
+	isController = 1;
+	label = Reference;
+    };
+}

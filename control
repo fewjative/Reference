@@ -1,0 +1,9 @@
+Package: com.joshdoctors.reference
+Name: Reference
+Depends: mobilesubstrate
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: Puts a screenshot of the last app used in your reachability view.
+Maintainer: Josh Doctors
+Author: Josh Doctors
+Section: Tweaks
