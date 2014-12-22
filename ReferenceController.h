@@ -10,6 +10,8 @@
 	
 	SBWindow *backgroundWindow;
 	UIImageView *lastAppImageView;
+	UIView *wrapperView;
+	UIScrollView * scrollView;
 }
 
 +(instancetype)sharedInstance;
@@ -17,4 +19,5 @@
 -(void)setupWidget;
 -(void)deconstructWidget;
 -(void)setLastAppImageView:(UIImageView*)imageView;
+-(void)adjustWidget:(SBWindow*)window setLastAppImageView:(UIImageView*)imageView;
 @end

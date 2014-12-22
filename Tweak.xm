@@ -7,9 +7,23 @@
 #define kBundlePath @"/Library/PreferenceBundles/ReferenceSettings.bundle"
 
 static BOOL enabled = NO;
+static UIWindow * dragWindow;
+static CGPoint firstLocation;
+static CGFloat defaultCenterX;
+static CGFloat newCenterY = 0.0;
+static BOOL runOnce = NO;
 
 @interface SBUIController
 @end
+
+%hook UIWindow
+
+-(void)setFrame:(CGRect)frame {
+	NSLog(@"Frame: %@",NSStringFromCGRect(frame));
+	%orig;
+}
+
+%end
 
 %hook SBWorkspace
 
@@ -17,11 +31,28 @@ static BOOL enabled = NO;
 	%orig;
 	if (enabled && [%c(SBReachabilityManager) reachabilitySupported]) {
 
-		SBWindow *backgroundView = MSHookIvar<SBWindow*>(self,"_reachabilityEffectWindow");
-		[[ReferenceController sharedInstance] setBackgroundWindow:backgroundView];
-		[[ReferenceController sharedInstance] setLastAppImageView:[self lastAppImageView]];
-		[[ReferenceController sharedInstance] setupWidget];
-		NSLog(@"Creation and addition success.");
+		if(dragWindow==nil)
+		{
+			dragWindow = [[UIWindow alloc] initWithFrame:CGRectMake(0,[UIScreen mainScreen].bounds.size.height*.3,768,30)];
+			dragWindow.windowLevel = 2003;
+			[dragWindow makeKeyAndVisible];
+			defaultCenterX = dragWindow.center.x;
+
+			if((dragWindow.center.y + newCenterY) < [UIScreen mainScreen].bounds.size.height*.3)
+				newCenterY = 0.0;
+
+			if((dragWindow.center.y + newCenterY) > [UIScreen mainScreen].bounds.size.height*.6)
+				newCenterY = [UIScreen mainScreen].bounds.size.height*.3;
+
+			dragWindow.center = CGPointMake(defaultCenterX,dragWindow.center.y+newCenterY);
+			NSLog(@"Center: %@",NSStringFromCGPoint(dragWindow.center));
+			
+			dragWindow.backgroundColor = [UIColor redColor];
+			UIPanGestureRecognizer * pangr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+			[dragWindow addGestureRecognizer: pangr];
+		}
+
+		[self adjustFrames:dragWindow.center];
 	}
 }
 
@@ -29,6 +60,9 @@ static BOOL enabled = NO;
 	%orig;
 	if (enabled && [%c(SBReachabilityManager) reachabilitySupported]) {
 		[[ReferenceController sharedInstance] deconstructWidget];
+		dragWindow.hidden = YES;
+		[dragWindow release];
+		dragWindow = nil;
 		NSLog(@"Deconstuction and removal success.");
 	}
 }
@@ -42,8 +76,54 @@ static BOOL enabled = NO;
 	return imageView;
 }
 
-%end
+%new -(void)handlePan:(UIPanGestureRecognizer*)uigr
+{
+	NSLog(@"Handling pan");
+	if(uigr.state==UIGestureRecognizerStateBegan)
+	{
+		NSLog(@"firstLocation");
+		firstLocation = [uigr locationInView:dragWindow];
+		firstLocation.y = newCenterY + [UIScreen mainScreen].bounds.size.height*.3;
+		NSLog(@"first loc: %@",NSStringFromCGPoint(firstLocation));
+	}
+	else if(uigr.state==UIGestureRecognizerStateChanged)
+	{
+		NSLog(@"translation");
+		CGPoint translation = [uigr translationInView:dragWindow];
 
+		if((firstLocation.y + translation.y) < [UIScreen mainScreen].bounds.size.height*.3)
+		{
+			dragWindow.center = CGPointMake(defaultCenterX,[UIScreen mainScreen].bounds.size.height*.3);
+			newCenterY = 0.0;
+		}
+		else if((firstLocation.y + translation.y) > [UIScreen mainScreen].bounds.size.height*.6)
+		{
+			dragWindow.center = CGPointMake(defaultCenterX,[UIScreen mainScreen].bounds.size.height*.6);
+			newCenterY = [UIScreen mainScreen].bounds.size.height*.3;
+		}
+		else
+		{
+			dragWindow.center = CGPointMake(defaultCenterX, firstLocation.y + translation.y);
+			newCenterY = translation.y;
+		}
+
+		[self adjustFrames:dragWindow.center];
+	}
+}
+
+%new -(void)adjustFrames:(CGPoint)center
+{
+		SBWindow *effectWindow = MSHookIvar<SBWindow*>(self,"_reachabilityEffectWindow");
+		CGRect newEWFrame = CGRectMake(effectWindow.frame.origin.x,effectWindow.frame.origin.y,effectWindow.frame.size.width,center.y);
+		[effectWindow setFrame:newEWFrame];
+
+		SBWindow *defaultWindow = MSHookIvar<SBWindow*>(self,"_reachabilityWindow");
+		CGRect newDWFrame = CGRectMake(defaultWindow.frame.origin.x,center.y,defaultWindow.frame.size.width,defaultWindow.frame.size.height);
+		[defaultWindow setFrame:newDWFrame];
+		[[ReferenceController sharedInstance] adjustWidget:effectWindow setLastAppImageView:[self lastAppImageView]];
+}
+
+%end
 
 %hook UIApplication
 

@@ -17,21 +17,24 @@ static bool manualMode = NO;
 }
 
 //Widget setup
--(void)setBackgroundWindow:(SBWindow*)window {
-	backgroundWindow = window;
-}
-
--(void)setLastAppImageView:(UIImageView*)imageView{
-	lastAppImageView = imageView;
-}
-
 -(void)setupWidget {
 	NSLog(@"setupWidget");
 
 	if (backgroundWindow && lastAppImageView) {
 
-		UIView *wrapperView = [[UIView alloc] initWithFrame:backgroundWindow.bounds];
-		UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:wrapperView.frame];
+		if(!wrapperView)
+			wrapperView = [[UIView alloc] initWithFrame:backgroundWindow.bounds];
+		else
+			[wrapperView setFrame:backgroundWindow.bounds];
+
+		if(!scrollView)
+			scrollView = [[UIScrollView alloc] initWithFrame:wrapperView.frame];
+		else
+			[scrollView setFrame:wrapperView.frame];
+
+		NSLog(@"wrapperView: %@",wrapperView);
+		NSLog(@"scrollView: %@",scrollView);
+		NSLog(@"lastAppImageView: %@", lastAppImageView);
 
 	   	[scrollView addSubview:lastAppImageView];
 
@@ -42,14 +45,10 @@ static bool manualMode = NO;
 	    [scrollView setCanCancelContentTouches:NO];
 		[scrollView setDelegate:self];
 
-		[wrapperView addSubview:scrollView];
-		[scrollView release];
-		NSLog(@"WrapperView :%@",wrapperView);
-		[wrapperView setUserInteractionEnabled:YES];
-		[backgroundWindow addSubview:wrapperView];
-		[backgroundWindow setUserInteractionEnabled:YES];
 		wrapperView.tag = 111222;
-		[wrapperView release];
+		[wrapperView addSubview:scrollView];
+
+		[backgroundWindow addSubview:wrapperView];
 
 		manualMode = !CFPreferencesCopyAppValue(CFSTR("manualMode"), CFSTR("com.joshdoctors.reference")) ? NO : [(id)CFPreferencesCopyAppValue(CFSTR("manualMode"), CFSTR("com.joshdoctors.reference")) boolValue];
     
@@ -72,6 +71,29 @@ static bool manualMode = NO;
 	}
 }
 
+-(void)adjustWidget:(SBWindow*)window setLastAppImageView:(UIImageView*)imageView
+{
+	NSLog(@"Adjusting widget");
+	backgroundWindow = window;
+
+	if (lastAppImageView) {
+		[lastAppImageView removeFromSuperview];
+	}
+	else
+	{
+		lastAppImageView = imageView;
+	}
+
+	if (scrollView) {
+		[scrollView removeFromSuperview];
+	}
+
+	if (wrapperView) {
+		[wrapperView removeFromSuperview];
+	}
+	[self setupWidget];
+}
+
 //Adios widget
 -(void)deconstructWidget {
 
@@ -79,16 +101,21 @@ static bool manualMode = NO;
 
 	if (lastAppImageView) {
 		[lastAppImageView removeFromSuperview];
+		[lastAppImageView release];
+		lastAppImageView = nil;
 	}
 
-	UIView * removeWrapperView = [backgroundWindow viewWithTag:111222];
-	if(removeWrapperView)
-	{
-		[removeWrapperView removeFromSuperview];
+	if (scrollView) {
+		[scrollView removeFromSuperview];
+		[scrollView release];
+		scrollView = nil;
 	}
 
-	[lastAppImageView release];
-	lastAppImageView = nil;
+	if (wrapperView) {
+		[wrapperView removeFromSuperview];
+		[wrapperView release];
+		wrapperView = nil;
+	}
 }
 
 @end
