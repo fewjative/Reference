@@ -1,7 +1,9 @@
 #import "ReferenceController.h"
 #import <QuartzCore/QuartzCore.h>
 
-static bool manualMode = NO;
+static BOOL manualMode = NO;
+static BOOL lastApp = NO;
+static BOOL lastAppInstalled = NO;
 
 @implementation ReferenceController
 
@@ -45,8 +47,14 @@ static bool manualMode = NO;
 	    [scrollView setCanCancelContentTouches:NO];
 		[scrollView setDelegate:self];
 
-		wrapperView.tag = 111222;
 		[wrapperView addSubview:scrollView];
+
+		UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressDidFire:)];
+		longPress.cancelsTouchesInView = NO;
+		longPress.minimumPressDuration = 0.5;
+		longPress.delegate = self;
+
+		[wrapperView addGestureRecognizer:longPress];
 
 		[backgroundWindow addSubview:wrapperView];
 
@@ -58,6 +66,14 @@ static bool manualMode = NO;
 			[[objc_getClass("SBReachabilityManager") sharedInstance] disableExpirationTimerForInteraction];
 		}
 	}
+}
+
+-(void)longPressDidFire:(UILongPressGestureRecognizer*)sender
+{
+	lastApp = !CFPreferencesCopyAppValue(CFSTR("lastApp"), CFSTR("com.joshdoctors.reference")) ? NO : [(id)CFPreferencesCopyAppValue(CFSTR("lastApp"), CFSTR("com.joshdoctors.reference")) boolValue];
+    
+	if(lastApp && [[NSFileManager defaultManager] fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/LastApp.dylib"])
+		[[UIApplication sharedApplication] lastApp_switchToLastApp];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {

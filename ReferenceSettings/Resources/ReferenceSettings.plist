@@ -25,6 +25,14 @@
 			<string>Enable Tweak</string>
 		</dict>
 		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerAlignment</key>
+			<integer>1</integer>
+			<key>footerText</key>
+			<string>Manual Reachability Control disables the reset timer on Reachability, keeping the view open indefinitely until you close it manually.</string>
+		</dict>
+		<dict>
 			<key>PostNotification</key>
 			<string>com.joshdoctors.reference/settingschanged</string>
 			<key>cell</key>
@@ -37,6 +45,86 @@
 			<string>manualMode</string>
 			<key>label</key>
 			<string>Manual Reachability Control</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerAlignment</key>
+			<integer>1</integer>
+			<key>footerText</key>
+			<string>You can adjust the size of the Reachability view by grabbing its bottom border and dragging it up or down.</string>
+		</dict>
+		<dict>
+			<key>PostNotification</key>
+			<string>com.joshdoctors.reference/settingschanged</string>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.joshdoctors.reference</string>
+			<key>key</key>
+			<string>adjustReachSize</string>
+			<key>label</key>
+			<string>Adjustable Reachability</string>
+		</dict>
+		<dict>
+            <key>cell</key>
+            <string>PSLinkCell</string>
+            <key>cellClass</key>
+            <string>PFColorCell</string>
+            <key>label</key>
+            <string>Drag Zone Color</string>
+            <key>color_defaults</key>
+            <string>com.joshdoctors.reference</string>
+            <key>color_key</key>
+            <string>dragZoneColor</string>
+            <key>title</key>
+            <string>Drag Zone Color</string>
+            <key>color_fallback</key>
+            <string>#ff0000</string>
+            <key>usesRGB</key>
+            <true/>
+            <key>usesAlpha</key>
+            <true/>
+            <key>color_postNotification</key>
+            <string>com.joshdoctors.reference/settingschanged</string>
+        </dict>
+        <dict>
+			<key>PostNotification</key>
+			<string>com.joshdoctors.reference/settingschanged</string>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.joshdoctors.reference</string>
+			<key>key</key>
+			<string>displayDragZone</string>
+			<key>label</key>
+			<string>Display Drag Zone</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerAlignment</key>
+			<integer>1</integer>
+			<key>footerText</key>
+			<string>After performing a long press in the Reachability view space, you will return to the last app used. You must have the tweak 'LastApp' in order for this to work.</string>
+		</dict>
+		<dict>
+			<key>PostNotification</key>
+			<string>com.joshdoctors.reference/settingschanged</string>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.joshdoctors.reference</string>
+			<key>key</key>
+			<string>lastApp</string>
+			<key>label</key>
+			<string>Return to the last app?</string>
 		</dict>
 		<dict>
 			<key>cell</key>
